@@ -2,10 +2,10 @@
 
 coreos:
   update:
-    group: GROUP
+    group: alpha
     reboot-strategy: off
   fleet:
-    etcd_servers: http://CONTROL-NODE-INTERNAL-IP:4001
+    etcd_servers: http://:4001
     metadata: role=master
   units:
     - name: etcd.service
@@ -25,7 +25,7 @@ coreos:
         ExecStartPre=/usr/bin/mkdir -p /opt/bin
         ExecStartPre=/usr/bin/wget -N -P /opt/bin https://storage.googleapis.com/k8s/flanneld
         ExecStartPre=/usr/bin/chmod +x /opt/bin/flanneld
-        ExecStart=/opt/bin/flanneld --etcd-endpoints http://CONTROL-NODE-INTERNAL-IP:4001
+        ExecStart=/opt/bin/flanneld --etcd-endpoints http://:4001
     - name: docker.service
       command: start
       content: |

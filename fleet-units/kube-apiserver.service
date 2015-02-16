@@ -10,7 +10,7 @@ ExecStart=/opt/bin/kube-apiserver \
 --address=0.0.0.0 \
 --port=8080 \
 --portal_net=10.244.0.0/16 \
---etcd_servers=http://127.0.0.1:4001 \
+--etcd_servers=http://CONTROL-NODE-INTERNAL-IP:4001 \
 --public_address_override=CONTROL-NODE-INTERNAL-IP \
 --logtostderr=true
 
@@ -18,4 +18,4 @@ Restart=always
 RestartSec=10
 
 [X-Fleet]
-MachineMetadata=role=control
+MachineMetadata=role=master

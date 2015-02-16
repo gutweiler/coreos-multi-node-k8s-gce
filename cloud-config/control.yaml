@@ -2,7 +2,7 @@
 
 coreos:
   update:
-    group: GROUP
+    group: alpha
     reboot-strategy: off
   etcd:
     name: etcd

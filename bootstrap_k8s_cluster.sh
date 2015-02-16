@@ -12,17 +12,17 @@ channel=$(cat settings | grep channel= | head -1 | cut -f2 -d"=")
 
 # control, k8s master and node types
 control_machine_type=$(cat settings | grep control_machine_type= | head -1 | cut -f2 -d"=")
-k8s_master_machine_type=$(cat settings | grep k8s_master_machine_type= | head -1 | cut -f2 -d"=")
+master_machine_type=$(cat settings | grep k8s_master_machine_type= | head -1 | cut -f2 -d"=")
 node_machine_type=$(cat settings | grep node_machine_type= | head -1 | cut -f2 -d"=")
 ##
 
 ###
 # etcd control name
-control_name=project=$(cat settings | grep control_name= | head -1 | cut -f2 -d"=")
+control_name=$(cat settings | grep control_name= | head -1 | cut -f2 -d"=")
 # k8s master name
 master_name=$(cat settings | grep master_name= | head -1 | cut -f2 -d"=")
 # node name
-node_name=project=$(cat settings | grep node_name= | head -1 | cut -f2 -d"=")
+node_name=$(cat settings | grep node_name= | head -1 | cut -f2 -d"=")
 ###
 
 # get the latest full image name
@@ -30,8 +30,6 @@ image=$(gcloud compute images list | grep -v grep | grep coreos-$channel | awk {
 
 # update cloud-configs with CoreOS release channel
 sed -i "" -e 's/GROUP/'$channel'/g' ./cloud-config/*.yaml
-# update fleet units with k8s version
-sed -i "" -e 's/k8s_version/'$k8s_version'/g' ./fleet-units/*.service
 #
 
 # CONTROL
@@ -52,7 +50,7 @@ sed -i "" -e 's/CONTROL-NODE-INTERNAL-IP/'$control_node_ip'/g' ./cloud-config/ma
 gcloud compute instances create $master_name \
 --project=$project --image=$image --image-project=coreos-cloud \
 --boot-disk-type=pd-ssd --boot-disk-size=10 --zone=$zone \
---machine-type=$master_machine_type --metadata-from-file user-data=./cloud-config/control.yaml \
+--machine-type=$master_machine_type --metadata-from-file user-data=./cloud-config/master.yaml \
 --can-ip-forward --scopes compute-rw --tags k8s-cluster
 
 # get master external IP
@@ -74,7 +72,7 @@ gcloud compute instances create $node_name-01 $node_name-02 \
 sed -i "" -e 's/CONTROL-NODE-INTERNAL-IP/'$control_node_ip'/g' ./fleet-units/*.service
 
 # download etcdctl, fleetctl and k8s binaries for OS X
-./get_k8s_fleet_etcd_osx.sh
+./install_k8s_fleet_etcd_osx.sh
 
 # set binaries folder, fleet tunnel to control's external IP
 export PATH=${HOME}/k8s-bin:$PATH
