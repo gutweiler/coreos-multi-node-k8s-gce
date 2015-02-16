@@ -1,34 +1,28 @@
 #!/bin/bash -x
 
-# SET ETCD VERSION TO BE USED !!!
-ETCD_RELEASE=v0.4.6
-
-# SET FLEET VERSION TO BE USED !!!
-FLEET_RELEASE=v0.9.0
-
-# SET KUBERNETES VERSION TO BE USED !!!
-k8s_version=v0.9.2
-
-## change Google Cloud settings as per your requirements
+# Update required settings in "settings" file
 # GC settings
 
-# SET YOUR PROJECT AND ZONE !!!
-project=my-cloud-project
-zone=europe-west1-c
+# project and zone
+project=$(cat settings | grep project= | head -1 | cut -f2 -d"=")
+zone=$(cat settings | grep zone= | head -1 | cut -f2 -d"=")
 
-# CoreOS RELEASE CHANNEL
-channel=alpha
+# CoreOS release channel
+channel=$(cat settings | grep channel= | head -1 | cut -f2 -d"=")
 
-# CONTROL AND NODES MACHINE TYPES
-control_machine_type=g1-small
-node_machine_type=n1-standard-1
+# control, k8s master and node types
+control_machine_type=$(cat settings | grep control_machine_type= | head -1 | cut -f2 -d"=")
+k8s_master_machine_type=$(cat settings | grep k8s_master_machine_type= | head -1 | cut -f2 -d"=")
+node_machine_type=$(cat settings | grep node_machine_type= | head -1 | cut -f2 -d"=")
 ##
 
 ###
-# control node name
-control_name=k8s-control
+# etcd control name
+control_name=project=$(cat settings | grep control_name= | head -1 | cut -f2 -d"=")
+# k8s master name
+master_name=$(cat settings | grep master_name= | head -1 | cut -f2 -d"=")
 # node name
-node_name=k8s-node
+node_name=project=$(cat settings | grep node_name= | head -1 | cut -f2 -d"=")
 ###
 
 # get the latest full image name
@@ -51,12 +45,24 @@ gcloud compute instances create $control_name \
 # get control node internal IP
 control_node_ip=$(gcloud compute instances list --project=$project | grep -v grep | grep $control_name | awk {'print $4'});
 
+# K8S MASTER
+# create k8s master
+# update master's cloud-config with control node's internal IP
+sed -i "" -e 's/CONTROL-NODE-INTERNAL-IP/'$control_node_ip'/g' ./cloud-config/master.yaml
+gcloud compute instances create $master_name \
+--project=$project --image=$image --image-project=coreos-cloud \
+--boot-disk-type=pd-ssd --boot-disk-size=10 --zone=$zone \
+--machine-type=$master_machine_type --metadata-from-file user-data=./cloud-config/control.yaml \
+--can-ip-forward --scopes compute-rw --tags k8s-cluster
+
+# get master external IP
+master_node_ip=$(gcloud compute instances list --project=$project | grep -v grep | grep $master_name | awk {'print $4'});
+
 # NODES
 # update node's cloud-config with control node's internal IP
 sed -i "" -e 's/CONTROL-NODE-INTERNAL-IP/'$control_node_ip'/g' ./cloud-config/node.yaml
-
 # create nodes
-#  by defaul it creates two nodes, e.g. to add a third one, add after '$node_name-02' $node_name-03 and so on
+#  by defaul it creates two nodes
 gcloud compute instances create $node_name-01 $node_name-02 \
 --project=$project --image=$image --image-project=coreos-cloud \
 --boot-disk-type=pd-ssd --boot-disk-size=20 --zone=$zone \

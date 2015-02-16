@@ -10,7 +10,7 @@ channel=alpha
 project=my-cloud-project
 zone=europe-west1-c
 
-# CONTROL AND NODES MACHINE TYPES
+# ETCD CONTROL, K8S MASTER AND NODES MACHINES TYPE
 #
 control_machine_type=g1-small
 #
@@ -19,11 +19,11 @@ k8s_master_machine_type=g1-small
 node_machine_type=n1-standard-1
 ##
 
-# ETCD CONTROL, K8S MASTER AND NODES INSTANCE NAMES
+# ETCD CONTROL, K8S MASTER AND NODE INSTANCE NAMES
 # etcd control name
 control_name=k8s-control
 # k8s master name
-control_name=k8s-master
+master_name=k8s-master
 # node name
 node_name=k8s-node
 ###
