@@ -1,0 +1,29 @@
+# coreos-multi-node-k8s-gce v0.1.2
+
+## change Google Cloud settings as per your requirements
+# GC settings
+
+# CoreOS RELEASE CHANNEL
+channel=alpha
+
+# SET YOUR PROJECT AND ZONE !!!
+project=my-cloud-project
+zone=europe-west1-c
+
+# CONTROL AND NODES MACHINE TYPES
+#
+control_machine_type=g1-small
+#
+k8s_master_machine_type=g1-small
+#
+node_machine_type=n1-standard-1
+##
+
+# ETCD CONTROL, K8S MASTER AND NODES INSTANCE NAMES
+# etcd control name
+control_name=k8s-control
+# k8s master name
+control_name=k8s-master
+# node name
+node_name=k8s-node
+###

@@ -1,8 +1,16 @@
 #!/bin/bash
 
+# GC project
+project=$(cat settings | grep project= | head -1 | cut -f2 -d"=")
+# control node name
+control_name=$(cat settings | grep control_name= | head -1 | cut -f2 -d"=")
+# get control node external IP
+control_ip=$(gcloud compute instances list --project=$project | grep -v grep | grep $control_name | awk {'print $5'});
+
 mkdir ~/k8s-bin
 # download etcd and fleet clients for OS X
-ETCD_RELEASE=$(cat bootstrap_k8s_cluster.sh | grep ETCD_RELEASE= | head -1 | cut -f2 -d"=")
+ETCD_RELEASE=$(ssh core@$control_ip etcdctl --version | cut -d " " -f 3- | tr -d '\r')
+###$(cat bootstrap_k8s_cluster.sh | grep ETCD_RELEASE= | head -1 | cut -f2 -d"=")
 echo "Downloading etcdctl $ETCD_RELEASE for OS X"
 curl -L -o etcd.zip "https://github.com/coreos/etcd/releases/download/$ETCD_RELEASE/etcd-$ETCD_RELEASE-darwin-amd64.zip"
 unzip -j -o "etcd.zip" "etcd-$ETCD_RELEASE-darwin-amd64/etcdctl"
@@ -13,7 +21,8 @@ echo "etcdctl was copied to ~/k8s-bin"
 echo " "
 
 #
-FLEET_RELEASE=$(cat bootstrap_k8s_cluster.sh | grep FLEET_RELEASE= | head -1 | cut -f2 -d"=")
+FLEET_RELEASE=$(ssh core@$control_ip fleetctl version | cut -d " " -f 3- | tr -d '\r')
+###$(cat bootstrap_k8s_cluster.sh | grep FLEET_RELEASE= | head -1 | cut -f2 -d"=")
 echo "Downloading fleetctl $FLEET_RELEASE for OS X"
 curl -L -o fleet.zip "https://github.com/coreos/fleet/releases/download/$FLEET_RELEASE/fleet-$FLEET_RELEASE-darwin-amd64.zip"
 unzip -j -o "fleet.zip" "fleet-$FLEET_RELEASE-darwin-amd64/fleetctl"
@@ -25,7 +34,8 @@ echo " "
 
 # download kubernetes binaries for OS X
 # k8s version
-k8s_version=$(cat bootstrap_k8s_cluster.sh | grep k8s_version= | head -1 | cut -f2 -d"=")
+k8s_version=$(curl --insecure -sS https://get.k8s.io | grep release= | cut -f2 -d"=")
+###$(cat bootstrap_k8s_cluster.sh | grep k8s_version= | head -1 | cut -f2 -d"=")
 echo "Downloading kubernetes $k8s_version for OS X"
 wget -c https://github.com/GoogleCloudPlatform/kubernetes/releases/download/$k8s_version/kubernetes.tar.gz
 tar -xzvf kubernetes.tar.gz kubernetes/platforms/darwin/amd64

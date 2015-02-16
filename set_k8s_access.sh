@@ -3,11 +3,11 @@
 # Setup Client SSH Tunnels
 
 # GC project
-project=$(cat bootstrap_k8s_cluster.sh | grep project= | head -1 | cut -f2 -d"=")
+project=$(cat settings | grep project= | head -1 | cut -f2 -d"=")
 # control node name
-control_name=$(cat bootstrap_k8s_cluster.sh | grep control_name= | head -1 | cut -f2 -d"=")
+control_name=$(cat settings | grep control_name= | head -1 | cut -f2 -d"=")
 
-# get control node internal IP
+# get control node external IP
 control_external_ip=$(gcloud compute instances list --project=$project | grep -v grep | grep $control_name | awk {'print $5'});
 
 # SET
@@ -28,8 +28,7 @@ echo " "
 fleetctl list-units
 
 echo " "
-#kubectl get minions
-kubecfg list minions
+kubectl get minions
 
 /bin/bash
 
